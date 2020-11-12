@@ -8,13 +8,15 @@
 }
 
 .item {
-    width: 100px;
-    height: 100px;
+    /* width: 100px;
+    height: 100px; */
     position: absolute;
 
     background-size: 50%;
     background-repeat: no-repeat;
     background-position: center;
+
+    transition: 0.3s;
 
     
 }

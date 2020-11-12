@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
 
 export const randomString = (len = 32) => {
@@ -11,6 +11,8 @@ export const randomString = (len = 32) => {
   }
   return pwd;
 };
+
+const WIDTH = 30;
 
 function getRandomAnmal() {
   const list = [
@@ -29,7 +31,7 @@ function getRandomAnmal() {
     // "lion",
     // "panda",
     // "snake",
-    "cat",
+    // "cat",
     // "elephant",
     // "monkey",
     // "pig",
@@ -51,8 +53,10 @@ function initData(m, n) {
         y: j,
         animal,
         style: {
-          left: i * 100 + "px",
-          top: j * 100 + "px",
+          width: WIDTH,
+          height: WIDTH,
+          left: i * WIDTH + "px",
+          top: j * WIDTH + "px",
           //   backgroundColor: "aliceblue",
           backgroundImage: "url(./images/" + animal + ".svg)",
         },
@@ -64,23 +68,64 @@ function initData(m, n) {
 }
 
 export default () => {
-  const [list, setList] = useState(initData(5, 5));
+  const m = 10;
+  const n = 10;
+  const [list, setList] = useState(initData(m, n));
   const [first, setFirst] = useState();
   const [second, setSecond] = useState();
 
-  function moveTo(o, x, y) {
-    const idx = list.findIndex((i) => i.id === o.id);
-    list[idx] = {
-      ...o,
-      x: x,
-      y: y,
-      style: {
-        ...o.style,
-        left: x * 100 + "px",
-        top: y * 100 + "px",
-      },
-    };
-    setList([...list]);
+  function checkY(row) {
+    let p = 0;
+    let q = 0;
+    let result = [];
+    let current = list.find((i) => i.x === p && i.y === row);
+
+    function loop() {
+    //   console.log(p, q);
+
+      let next = list.find((i) => i.x === q && i.y === row);
+
+      if (current.animal === next.animal) {
+      } else {
+        // console.log("不一样");
+
+        if (q - 1 - p > 1) {
+        //   console.log("p:", p, "q:", q, current.animal, " - ", next.animal);
+
+          for (let x = p; x <= q - 1; x++) {
+            result.push([x, row]);
+          }
+        }
+        p = q;
+      }
+
+      if (q === m - 1) {
+        // console.log("final:", p, q);
+        if (q - p > 1) {
+        //   console.log("p:", p, "q:", q, current.animal, " - ", next.animal);
+          for (let x = p; x <= q; x++) {
+            result.push([x, row]);
+          }
+        }
+        return;
+      }
+
+      if (q < m - 1) {
+        q += 1;
+
+        current = next;
+        loop();
+        return;
+      }
+    }
+
+    loop();
+
+    console.log("result", result);
+  }
+
+  function check() {
+    checkY(0);
   }
 
   function change(s, f) {
@@ -91,8 +136,8 @@ export default () => {
       y: s.y,
       style: {
         ...f.style,
-        left: s.x * 100 + "px",
-        top: s.y * 100 + "px",
+        left: s.x * WIDTH + "px",
+        top: s.y * WIDTH + "px",
       },
     };
 
@@ -103,8 +148,8 @@ export default () => {
       y: f.y,
       style: {
         ...s.style,
-        left: f.x * 100 + "px",
-        top: f.y * 100 + "px",
+        left: f.x * WIDTH + "px",
+        top: f.y * WIDTH + "px",
       },
     };
 
@@ -117,9 +162,14 @@ export default () => {
       setFirst(o);
     } else if (o.id !== first.id) {
       change(first, o);
-      setFirst(null)
+      setFirst(null);
+      check();
     }
   }
+
+  useEffect(() => {
+    check();
+  }, []);
 
   console.log(list);
   return (
@@ -140,13 +190,13 @@ export default () => {
           />
         );
       })}
-      <button
+      {/* <button
         onClick={() => {
           test();
         }}
       >
         test
-      </button>
+      </button> */}
     </div>
   );
 };
