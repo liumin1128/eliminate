@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import flatten from "lodash/flatten"
 import "./index.css";
 
 export const randomString = (len = 32) => {
@@ -12,12 +13,12 @@ export const randomString = (len = 32) => {
   return pwd;
 };
 
-const WIDTH = 30;
+const WIDTH = 100;
 
 function getRandomAnmal() {
   const list = [
     // "alligator",
-    // "chicken",
+    "chicken",
     "frog",
     // "mouse",
     // "sea-lion",
@@ -68,30 +69,23 @@ function initData(m, n) {
 }
 
 export default () => {
-  const m = 10;
-  const n = 10;
+  const m = 5;
+  const n = 5;
   const [list, setList] = useState(initData(m, n));
   const [first, setFirst] = useState();
   const [second, setSecond] = useState();
 
-  function checkY(row) {
+  function checkX(row) {
     let p = 0;
     let q = 0;
     let result = [];
     let current = list.find((i) => i.x === p && i.y === row);
 
     function loop() {
-    //   console.log(p, q);
-
       let next = list.find((i) => i.x === q && i.y === row);
-
       if (current.animal === next.animal) {
       } else {
-        // console.log("不一样");
-
         if (q - 1 - p > 1) {
-        //   console.log("p:", p, "q:", q, current.animal, " - ", next.animal);
-
           for (let x = p; x <= q - 1; x++) {
             result.push([x, row]);
           }
@@ -100,9 +94,7 @@ export default () => {
       }
 
       if (q === m - 1) {
-        // console.log("final:", p, q);
         if (q - p > 1) {
-        //   console.log("p:", p, "q:", q, current.animal, " - ", next.animal);
           for (let x = p; x <= q; x++) {
             result.push([x, row]);
           }
@@ -112,7 +104,6 @@ export default () => {
 
       if (q < m - 1) {
         q += 1;
-
         current = next;
         loop();
         return;
@@ -122,10 +113,73 @@ export default () => {
     loop();
 
     console.log("result", result);
+    return result
+  }
+
+  function checkY(row) {
+    let p = 0;
+    let q = 0;
+    let result = [];
+    let current = list.find((i) => i.y === p && i.x === row);
+
+    function loop() {
+      let next = list.find((i) => i.y === q && i.x === row);
+      if (current.animal === next.animal) {
+      } else {
+        if (q - 1 - p > 1) {
+          for (let x = p; x <= q - 1; x++) {
+            result.push([row, x]);
+          }
+        }
+        p = q;
+      }
+
+      if (q === m - 1) {
+        if (q - p > 1) {
+          for (let x = p; x <= q; x++) {
+            result.push([row, x]);
+          }
+        }
+        return;
+      }
+
+      if (q < m - 1) {
+        q += 1;
+        current = next;
+        loop();
+        return;
+      }
+    }
+
+    loop();
+
+    console.log("result", result);
+    return result
   }
 
   function check() {
-    checkY(0);
+    let sss = []
+    for(let i = 0; i < m; i ++) {
+        sss.push(checkX(i))
+    }
+    for(let j = 0; j < n; j ++) {
+        sss.push(checkY(j))
+    }
+    sss = flatten(sss)
+    
+    sss.map(([x, y]) => {
+        const idx = list.findIndex((j) => j.x === (x ) && j.y === (y ) );
+        list[idx] = {
+          ...list[idx],
+          style: {
+            ...list[idx].style,
+            backgroundColor: "#ccc"
+          },
+        };
+    })
+
+    setList([...list]);
+
   }
 
   function change(s, f) {
@@ -157,7 +211,6 @@ export default () => {
   }
 
   function test(o) {
-    console.log(o);
     if (!first) {
       setFirst(o);
     } else if (o.id !== first.id) {
@@ -171,7 +224,6 @@ export default () => {
     check();
   }, []);
 
-  console.log(list);
   return (
     <div className="list">
       {list.map((i) => {
@@ -183,7 +235,7 @@ export default () => {
             className={
               "item" +
               (first && i.id === first.id ? " first" : "") +
-              (second && i.id === second.id ? " second" : "")
+              (second && i.id === second.id ? " second" : "") 
             }
             key={i.id}
             style={i.style}
