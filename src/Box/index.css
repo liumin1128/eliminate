@@ -1,0 +1,44 @@
+.list {
+
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    position: relative;
+
+}
+
+.item {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    
+}
+
+.item:hover {
+    background-color: aquamarine;
+}
+
+.icon {
+    width: 100px;
+    height: 100px;
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* border-radius: 100%; */
+}
+
+.first {
+
+    /* border:1px solid aquamarine inset; */
+    background-color: aquamarine;
+}
+.second {
+    /* border:1px solid red inset; */
+    background-color: red;
+
+}
