@@ -34,12 +34,13 @@
     /* border-radius: 100%; */
 }
 
-.first {
+.select {
 
     /* border:1px solid aquamarine inset; */
     background-color: aquamarine;
 }
-.second {
+
+.remove {
     /* border:1px solid red inset; */
     background-color: red;
 

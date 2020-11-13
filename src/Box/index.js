@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import flatten from "lodash/flatten"
+import cls from "classnames";
+import flatten from "lodash/flatten";
+import { List } from "immutable";
 import "./index.css";
 
 export const randomString = (len = 32) => {
@@ -53,14 +55,7 @@ function initData(m, n) {
         x: i,
         y: j,
         animal,
-        style: {
-          width: WIDTH,
-          height: WIDTH,
-          left: i * WIDTH + "px",
-          top: j * WIDTH + "px",
-          //   backgroundColor: "aliceblue",
-          backgroundImage: "url(./images/" + animal + ".svg)",
-        },
+        select: false,
       });
     }
   }
@@ -71,23 +66,60 @@ function initData(m, n) {
 export default () => {
   const m = 5;
   const n = 5;
-  const [list, setList] = useState(initData(m, n));
-  const [first, setFirst] = useState();
-  const [second, setSecond] = useState();
+  const [list, setList] = useState(List(initData(m, n)));
 
-  function checkX(row) {
+  useEffect(() => {
+    let removeList = [];
+    for (let i = 0; i < n; i++) {
+      removeList.push(checkX(list, i, "x"));
+    }
+    for (let i = 0; i < m; i++) {
+      removeList.push(checkX(list, i, "y"));
+    }
+    removeList = flatten(removeList);
+
+    let temp = list;
+    removeList.map(([x, y]) => {
+      const idx = list.findIndex((i) => i.x === x && i.y === y);
+      temp = temp.setIn([idx, "remove"], true);
+    });
+
+    setList(temp);
+  }, [list]);
+
+  function checkX(list, row, type) {
     let p = 0;
     let q = 0;
     let result = [];
-    let current = list.find((i) => i.x === p && i.y === row);
+
+    const transXYMap = {
+      x: "y",
+      y: "x",
+    };
+
+    function getItem(data) {
+      return list.find((i) => i[type] === data && i[transXYMap[type]] === row);
+    }
+
+    function getValue(value) {
+      if (type === "x") {
+        return [value, row];
+      }
+      if (type === "y") {
+        return [row, value];
+      }
+    }
+
+    let current = getItem(q);
 
     function loop() {
-      let next = list.find((i) => i.x === q && i.y === row);
-      if (current.animal === next.animal) {
-      } else {
+      let next = getItem(q);
+
+      console.log("current, next", current.animal, next.animal);
+      if (current.animal !== next.animal) {
         if (q - 1 - p > 1) {
           for (let x = p; x <= q - 1; x++) {
-            result.push([x, row]);
+            result.push(getValue(x));
           }
         }
         p = q;
@@ -96,7 +128,7 @@ export default () => {
       if (q === m - 1) {
         if (q - p > 1) {
           for (let x = p; x <= q; x++) {
-            result.push([x, row]);
+            result.push(getValue(x));
           }
         }
         return;
@@ -112,117 +144,38 @@ export default () => {
 
     loop();
 
-    console.log("result", result);
-    return result
+    return result;
   }
 
-  function checkY(row) {
-    let p = 0;
-    let q = 0;
-    let result = [];
-    let current = list.find((i) => i.y === p && i.x === row);
-
-    function loop() {
-      let next = list.find((i) => i.y === q && i.x === row);
-      if (current.animal === next.animal) {
-      } else {
-        if (q - 1 - p > 1) {
-          for (let x = p; x <= q - 1; x++) {
-            result.push([row, x]);
-          }
-        }
-        p = q;
-      }
-
-      if (q === m - 1) {
-        if (q - p > 1) {
-          for (let x = p; x <= q; x++) {
-            result.push([row, x]);
-          }
-        }
-        return;
-      }
-
-      if (q < m - 1) {
-        q += 1;
-        current = next;
-        loop();
-        return;
-      }
-    }
-
-    loop();
-
-    console.log("result", result);
-    return result
-  }
-
-  function check() {
-    let sss = []
-    for(let i = 0; i < m; i ++) {
-        sss.push(checkX(i))
-    }
-    for(let j = 0; j < n; j ++) {
-        sss.push(checkY(j))
-    }
-    sss = flatten(sss)
-    
-    sss.map(([x, y]) => {
-        const idx = list.findIndex((j) => j.x === (x ) && j.y === (y ) );
-        list[idx] = {
-          ...list[idx],
-          style: {
-            ...list[idx].style,
-            backgroundColor: "#ccc"
-          },
-        };
-    })
-
-    setList([...list]);
-
-  }
-
-  function change(s, f) {
-    const idx = list.findIndex((i) => i.id === f.id);
-    list[idx] = {
-      ...f,
-      x: s.x,
-      y: s.y,
-      style: {
-        ...f.style,
-        left: s.x * WIDTH + "px",
-        top: s.y * WIDTH + "px",
-      },
-    };
-
-    const jdx = list.findIndex((i) => i.id === s.id);
-    list[jdx] = {
-      ...s,
-      x: f.x,
-      y: f.y,
-      style: {
-        ...s.style,
-        left: f.x * WIDTH + "px",
-        top: f.y * WIDTH + "px",
-      },
-    };
-
-    setList([...list]);
+  function change(list, a, b) {
+    const ax = list.getIn([a, "x"]);
+    const ay = list.getIn([a, "y"]);
+    const bx = list.getIn([b, "x"]);
+    const by = list.getIn([b, "y"]);
+    return list
+      .setIn([a, "x"], bx)
+      .setIn([a, "y"], by)
+      .setIn([b, "x"], ax)
+      .setIn([b, "y"], ay);
   }
 
   function test(o) {
-    if (!first) {
-      setFirst(o);
-    } else if (o.id !== first.id) {
-      change(first, o);
-      setFirst(null);
-      check();
+    const selectIdx = list.findIndex((i) => i.select);
+    const objIdx = list.findIndex((i) => i.x === o.x && i.y === o.y);
+    if (selectIdx != -1) {
+      setList(
+        change(list, selectIdx, objIdx).setIn([selectIdx, "select"], false)
+      );
+      // 重选
+      //   setList(
+      //     list.setIn([selectIdx, "select"], false).setIn([objIdx, "select"], true)
+      //   );
+    } else if (selectIdx === objIdx) {
+      setList(list.setIn([objIdx, "select"], false));
+    } else {
+      setList(list.setIn([objIdx, "select"], true));
     }
   }
-
-  useEffect(() => {
-    check();
-  }, []);
 
   return (
     <div className="list">
@@ -232,23 +185,24 @@ export default () => {
             onClick={() => {
               test(i);
             }}
-            className={
-              "item" +
-              (first && i.id === first.id ? " first" : "") +
-              (second && i.id === second.id ? " second" : "") 
-            }
+            className={cls([
+              "item",
+              {
+                select: i.select,
+                remove: i.remove,
+              },
+            ])}
             key={i.id}
-            style={i.style}
+            style={{
+              width: WIDTH,
+              height: WIDTH,
+              left: i.x * WIDTH + "px",
+              top: i.y * WIDTH + "px",
+              backgroundImage: "url(./images/" + i.animal + ".svg)",
+            }}
           />
         );
       })}
-      {/* <button
-        onClick={() => {
-          test();
-        }}
-      >
-        test
-      </button> */}
     </div>
   );
 };
