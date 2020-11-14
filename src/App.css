@@ -1,5 +1,6 @@
 .App {
   text-align: center;
-  padding: 200px;
+  padding: 100px;
+  padding-top: 500px;
+  /* border: 1px red dashed; */
 }
-

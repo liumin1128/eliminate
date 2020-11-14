@@ -16,6 +16,8 @@ export const randomString = (len = 32) => {
   return pwd;
 };
 
+const sleep = (t) => new Promise((resolve, reject) => setTimeout(resolve, t));
+
 const WIDTH = 100;
 
 function getRandomAnmal() {
@@ -64,48 +66,125 @@ function initData(m, n) {
   return list;
 }
 
-export default () => {
-  const m = 5;
-  const n = 5;
-  const [list, setList] = useState(List(initData(m, n)));
+class Gamer {
+  constructor(x, y) {
+    this.maxX = x;
+    this.maxY = x;
+    this.removeList = [];
+    this.data = List(initData(x, y));
+  }
+  init = () => {};
+  start = () => {
+    this.checkStatus();
+  };
+  setCallback = (callback) => {
+    this.callback = callback;
+  };
+  getData = () => {
+    return this.data;
+  };
+  onChange = () => {
+    this.callback(this.data);
+  };
+  getRemoveList() {
+    const transXYMap = {
+      x: "y",
+      y: "x",
+    };
 
-  useEffect(() => {
-    const removeList = getRemoveList();
-    setList(setRemoveListStatusRemoveing(removeList));
-    setTimeout(() => {
-      setList(setRemoveListStatusDone(removeList));
-    }, 500);
-  }, []);
+    const transMaxXYMap = {
+      x: this.maxX,
+      y: this.maxY,
+    };
 
-  function getRemoveList() {
-    let removeList = [];
-    for (let i = 0; i < n; i++) {
-      removeList.push(checkLine(list, i, "x"));
+    function checkLine(list, row, type) {
+      let p = 0;
+      let q = 0;
+      let result = [];
+
+      function getItem(data) {
+        // console.log("getItem: ", list, type, data);
+        return list.find(
+          (i) => i[type] === data && i[transXYMap[type]] === row
+        );
+      }
+
+      function getValue(value) {
+        if (type === "x") {
+          return [value, row];
+        }
+        if (type === "y") {
+          return [row, value];
+        }
+      }
+
+      let current = getItem(q);
+
+      function loop() {
+        let next = getItem(q);
+
+        if (current.animal !== next.animal) {
+          if (q - 1 - p > 1) {
+            for (let x = p; x <= q - 1; x++) {
+              result.push(getValue(x));
+            }
+          }
+          p = q;
+        }
+
+        if (q === transMaxXYMap[type] - 1) {
+          if (q - p > 1) {
+            for (let x = p; x <= q; x++) {
+              result.push(getValue(x));
+            }
+          }
+          return;
+        }
+
+        if (q < transMaxXYMap[type] - 1) {
+          q += 1;
+          current = next;
+          loop();
+          return;
+        }
+      }
+
+      loop();
+
+      return result;
     }
-    for (let i = 0; i < m; i++) {
-      removeList.push(checkLine(list, i, "y"));
+
+    console.log("00000");
+
+    let removeList = [];
+    console.log(this);
+    for (let i = 0; i < this.maxY; i++) {
+      removeList.push(checkLine(this.data, i, "x"));
+    }
+    for (let i = 0; i < this.maxX; i++) {
+      removeList.push(checkLine(this.data, i, "y"));
     }
     const s = flatten(removeList);
     const t = unionBy(s, (i) => i.join(","));
     removeList = t;
+    this.removeList = removeList;
     return removeList;
   }
 
-  function setRemoveListStatusRemoveing(removeList) {
-    let temp = list;
-    removeList.map(([x, y]) => {
-      const idx = list.findIndex((i) => i.x === x && i.y === y);
+  setRemoveStatus() {
+    let temp = this.data;
+    this.removeList.map(([x, y]) => {
+      const idx = this.data.findIndex((i) => i.x === x && i.y === y);
       temp = temp.setIn([idx, "remove"], true);
     });
-    return temp;
+    this.data = temp;
   }
 
-  function setRemoveListStatusDone(removeList) {
-    let temp = list;
+  setRemovePosition() {
+    let temp = this.data;
     let sumMap = {};
-    console.log(removeList);
-    removeList.map(([x, y]) => {
-      const idx = list.findIndex((i) => i.x === x && i.y === y);
+    this.removeList.map(([x, y]) => {
+      const idx = this.data.findIndex((i) => i.x === x && i.y === y);
       if (sumMap[x] === undefined) {
         sumMap[x] = -1;
       } else {
@@ -115,70 +194,37 @@ export default () => {
       temp = temp.setIn([idx, "y"], sumMap[x]);
       //   .setIn([idx, "animal"], getRandomAnmal());
     });
-    return temp;
+    this.data = temp;
   }
 
-  function checkLine(list, row, type) {
-    let p = 0;
-    let q = 0;
-    let result = [];
-
-    const transXYMap = {
-      x: "y",
-      y: "x",
-    };
-
-    function getItem(data) {
-      return list.find((i) => i[type] === data && i[transXYMap[type]] === row);
-    }
-
-    function getValue(value) {
-      if (type === "x") {
-        return [value, row];
-      }
-      if (type === "y") {
-        return [row, value];
-      }
-    }
-
-    let current = getItem(q);
-
-    function loop() {
-      let next = getItem(q);
-
-      console.log("current, next", current.animal, next.animal);
-      if (current.animal !== next.animal) {
-        if (q - 1 - p > 1) {
-          for (let x = p; x <= q - 1; x++) {
-            result.push(getValue(x));
-          }
-        }
-        p = q;
-      }
-
-      if (q === m - 1) {
-        if (q - p > 1) {
-          for (let x = p; x <= q; x++) {
-            result.push(getValue(x));
-          }
-        }
-        return;
-      }
-
-      if (q < m - 1) {
-        q += 1;
-        current = next;
-        loop();
-        return;
-      }
-    }
-
-    loop();
-
-    return result;
+  async checkStatus() {
+    await sleep(300);
+    this.getRemoveList();
+    await sleep(300);
+    this.setRemoveStatus();
+    await sleep(300);
+    this.onChange();
+    await sleep(300);
+    this.setRemovePosition();
+    await sleep(300);
+    this.onChange();
+    await sleep(300);
   }
+}
 
-  function change(list, a, b) {
+const gamer = new Gamer(5, 5);
+
+export default () => {
+  const m = 5;
+  const n = 5;
+
+  const [list, setList] = useState(gamer.getData());
+  useEffect(() => {
+    gamer.setCallback(setList);
+    gamer.start();
+  }, []);
+
+  function a2b(list, a, b) {
     const ax = list.getIn([a, "x"]);
     const ay = list.getIn([a, "y"]);
     const bx = list.getIn([b, "x"]);
@@ -194,9 +240,7 @@ export default () => {
     const selectIdx = list.findIndex((i) => i.select);
     const objIdx = list.findIndex((i) => i.x === o.x && i.y === o.y);
     if (selectIdx != -1) {
-      setList(
-        change(list, selectIdx, objIdx).setIn([selectIdx, "select"], false)
-      );
+      setList(a2b(list, selectIdx, objIdx).setIn([selectIdx, "select"], false));
       // 重选
       //   setList(
       //     list.setIn([selectIdx, "select"], false).setIn([objIdx, "select"], true)
@@ -207,6 +251,8 @@ export default () => {
       setList(list.setIn([objIdx, "select"], true));
     }
   }
+
+  console.log("list: ", list, JSON.stringify(list));
 
   return (
     <div className="list">
@@ -231,7 +277,9 @@ export default () => {
               top: i.y * WIDTH + "px",
               backgroundImage: "url(./images/" + i.animal + ".svg)",
             }}
-          />
+          >
+            ({i.x},{i.y})
+          </div>
         );
       })}
     </div>

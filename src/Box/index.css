@@ -1,47 +1,49 @@
 .list {
-
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    position: relative;
-
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  position: relative;
+  border-top: 1px red dashed;
 }
 
 .item {
-    /* width: 100px;
+  /* width: 100px;
     height: 100px; */
-    position: absolute;
+  position: absolute;
 
-    background-size: 50%;
-    background-repeat: no-repeat;
-    background-position: center;
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center;
 
-    transition: 0.3s;
+  transition: 0.3s;
 
-    
+  text-align: center;
+  line-height: 170px;
+  font-size: 10px;
+  color: #999;
+
+  border: 1px dashed #ccc;
 }
 
 .item:hover {
-    background-color: aquamarine;
+  background-color: aquamarine;
 }
 
 .icon {
-    width: 100px;
-    height: 100px;
-    background-size: 50%;
-    background-repeat: no-repeat;
-    background-position: center;
-    /* border-radius: 100%; */
+  width: 100px;
+  height: 100px;
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center;
+  /* border-radius: 100%; */
 }
 
 .select {
-
-    /* border:1px solid aquamarine inset; */
-    background-color: aquamarine;
+  /* border:1px solid aquamarine inset; */
+  background-color: aquamarine;
 }
 
 .remove {
-    /* border:1px solid red inset; */
-    background-color: red;
-
+  /* border:1px solid red inset; */
+  background-color: red;
 }
