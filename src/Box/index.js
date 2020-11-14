@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import cls from "classnames";
 import flatten from "lodash/flatten";
+import unionBy from "lodash/unionBy";
 import { List } from "immutable";
 import "./index.css";
 
@@ -69,25 +70,55 @@ export default () => {
   const [list, setList] = useState(List(initData(m, n)));
 
   useEffect(() => {
+    const removeList = getRemoveList();
+    setList(setRemoveListStatusRemoveing(removeList));
+    setTimeout(() => {
+      setList(setRemoveListStatusDone(removeList));
+    }, 500);
+  }, []);
+
+  function getRemoveList() {
     let removeList = [];
     for (let i = 0; i < n; i++) {
-      removeList.push(checkX(list, i, "x"));
+      removeList.push(checkLine(list, i, "x"));
     }
     for (let i = 0; i < m; i++) {
-      removeList.push(checkX(list, i, "y"));
+      removeList.push(checkLine(list, i, "y"));
     }
-    removeList = flatten(removeList);
+    const s = flatten(removeList);
+    const t = unionBy(s, (i) => i.join(","));
+    removeList = t;
+    return removeList;
+  }
 
+  function setRemoveListStatusRemoveing(removeList) {
     let temp = list;
     removeList.map(([x, y]) => {
       const idx = list.findIndex((i) => i.x === x && i.y === y);
       temp = temp.setIn([idx, "remove"], true);
     });
+    return temp;
+  }
 
-    setList(temp);
-  }, [list]);
+  function setRemoveListStatusDone(removeList) {
+    let temp = list;
+    let sumMap = {};
+    console.log(removeList);
+    removeList.map(([x, y]) => {
+      const idx = list.findIndex((i) => i.x === x && i.y === y);
+      if (sumMap[x] === undefined) {
+        sumMap[x] = -1;
+      } else {
+        sumMap[x] = sumMap[x] - 1;
+      }
+      console.log(sumMap);
+      temp = temp.setIn([idx, "y"], sumMap[x]);
+      //   .setIn([idx, "animal"], getRandomAnmal());
+    });
+    return temp;
+  }
 
-  function checkX(list, row, type) {
+  function checkLine(list, row, type) {
     let p = 0;
     let q = 0;
     let result = [];
