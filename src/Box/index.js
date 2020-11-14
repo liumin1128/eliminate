@@ -27,7 +27,7 @@ function getRandomAnmal() {
     "chicken",
     "frog",
     // "mouse",
-    // "sea-lion",
+    "sea-lion",
     "bear",
     // "dog",
     // "hippo",
@@ -70,7 +70,8 @@ function initData(m, n) {
 class Gamer {
   constructor(x, y) {
     this.maxX = x;
-    this.maxY = x;
+    this.maxY = y;
+
     this.removeList = [];
     this.data = List(initData(x, y));
   }
@@ -105,10 +106,11 @@ class Gamer {
       let result = [];
 
       function getItem(data) {
-        // console.log("getItem: ", list, type, data);
-        return list.find(
+        const item = list.find(
           (i) => i[type] === data && i[transXYMap[type]] === row
         );
+
+        return item;
       }
 
       function getValue(value) {
@@ -284,29 +286,14 @@ class Gamer {
   };
 }
 
-const gamer = new Gamer(5, 5);
+const gamer = new Gamer(10, 10);
 
 export default () => {
-  const m = 5;
-  const n = 5;
-
   const [list, setList] = useState(gamer.getData());
   useEffect(() => {
     gamer.setCallback(setList);
     gamer.checkStatus();
   }, []);
-
-  function a2b(list, a, b) {
-    const ax = list.getIn([a, "x"]);
-    const ay = list.getIn([a, "y"]);
-    const bx = list.getIn([b, "x"]);
-    const by = list.getIn([b, "y"]);
-    return list
-      .setIn([a, "x"], bx)
-      .setIn([a, "y"], by)
-      .setIn([b, "x"], ax)
-      .setIn([b, "y"], ay);
-  }
 
   function test(o) {
     gamer.click(o);
