@@ -3,30 +3,36 @@
   justify-content: flex-start;
   flex-wrap: wrap;
   position: relative;
-  border-top: 1px red dashed;
+  border: 1px red dashed;
+  overflow: hidden;
+  height: 0;
+  padding-top: 100%;
 }
 
 .item {
   /* width: 100px;
     height: 100px; */
   position: absolute;
+  left: 0;
+  top: 0;
 
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;
 
-  transition: 0.3s;
+  transition: transform 0.3s;
 
   text-align: center;
-  line-height: 170px;
+  /* line-height: 170px; */
   font-size: 10px;
   color: #999;
 
-  border: 1px dashed #ccc;
+  border: 1px dashed #fff;
+  box-sizing: border-box;
 }
 
 .item:hover {
-  background-color: aquamarine;
+  border: 1px aquamarine dashed;
 }
 
 .icon {
@@ -40,10 +46,14 @@
 
 .select {
   /* border:1px solid aquamarine inset; */
-  background-color: aquamarine;
+  border: 1px aquamarine dashed;
 }
 
 .remove {
-  /* border:1px solid red inset; */
-  background-color: red;
+  opacity: 0;
+}
+
+.removed {
+  opacity: 0;
+  transition: 0s !important;
 }

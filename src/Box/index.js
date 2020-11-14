@@ -3,6 +3,7 @@ import cls from "classnames";
 import flatten from "lodash/flatten";
 import unionBy from "lodash/unionBy";
 import { List } from "immutable";
+import "animate.css";
 import "./index.css";
 
 export const randomString = (len = 32) => {
@@ -74,18 +75,19 @@ class Gamer {
     this.data = List(initData(x, y));
   }
   init = () => {};
-  start = () => {
-    this.checkStatus();
-  };
+
   setCallback = (callback) => {
     this.callback = callback;
   };
+
   getData = () => {
     return this.data;
   };
-  onChange = () => {
+
+  update = () => {
     this.callback(this.data);
   };
+
   getRemoveList() {
     const transXYMap = {
       x: "y",
@@ -110,12 +112,20 @@ class Gamer {
       }
 
       function getValue(value) {
+        let x;
+        let y;
+        let idx;
         if (type === "x") {
-          return [value, row];
+          x = value;
+          y = row;
         }
         if (type === "y") {
-          return [row, value];
+          x = row;
+          y = value;
         }
+        idx = list.findIndex((i) => i.x === x && i.y === y);
+        console.log({ x, y, idx });
+        return { x, y, idx };
       }
 
       let current = getItem(q);
@@ -154,10 +164,10 @@ class Gamer {
       return result;
     }
 
-    console.log("00000");
+    // console.log("00000");
 
     let removeList = [];
-    console.log(this);
+    // console.log(this);
     for (let i = 0; i < this.maxY; i++) {
       removeList.push(checkLine(this.data, i, "x"));
     }
@@ -165,17 +175,17 @@ class Gamer {
       removeList.push(checkLine(this.data, i, "y"));
     }
     const s = flatten(removeList);
-    const t = unionBy(s, (i) => i.join(","));
+    const t = unionBy(s, (i) => i.idx);
     removeList = t;
     this.removeList = removeList;
     return removeList;
   }
 
-  setRemoveStatus() {
+  setRemoveStatus(status) {
     let temp = this.data;
-    this.removeList.map(([x, y]) => {
-      const idx = this.data.findIndex((i) => i.x === x && i.y === y);
-      temp = temp.setIn([idx, "remove"], true);
+    // console.log(this.removeList)
+    this.removeList.map(({ idx }) => {
+      temp = temp.setIn([idx, "status"], status);
     });
     this.data = temp;
   }
@@ -183,33 +193,97 @@ class Gamer {
   setRemovePosition() {
     let temp = this.data;
     let sumMap = {};
-    this.removeList.map(([x, y]) => {
-      const idx = this.data.findIndex((i) => i.x === x && i.y === y);
+    this.removeList.map(({ idx, x, y }) => {
       if (sumMap[x] === undefined) {
         sumMap[x] = -1;
       } else {
         sumMap[x] = sumMap[x] - 1;
       }
-      console.log(sumMap);
-      temp = temp.setIn([idx, "y"], sumMap[x]);
-      //   .setIn([idx, "animal"], getRandomAnmal());
+      temp = temp
+        .setIn([idx, "y"], sumMap[x])
+        // .setIn([idx, "remove"], false)
+        .setIn([idx, "animal"], getRandomAnmal());
     });
+
+    this.data = temp;
+
+    console.log("this.data:", this.data);
+  }
+
+  getDownList() {
+    let temp = this.data;
+    for (let x = 0; x < this.maxX; x++) {
+      let sum = 0;
+      for (let y = -this.maxY; y < this.maxY; y++) {
+        const idx = this.data.findIndex((i) => i.x === x && i.y === y);
+        if (idx !== -1) {
+          // console.log("getDownList: ", item.x, item.y);
+          temp = temp.setIn([idx, "y"], sum);
+          sum++;
+        }
+      }
+    }
     this.data = temp;
   }
 
   async checkStatus() {
-    await sleep(300);
+    console.log("checkStatus");
     this.getRemoveList();
+    console.log("this.removeList", this.removeList);
+
+    if (this.removeList.length === 0) return; // 检查是否有需要更新的方块
     await sleep(300);
-    this.setRemoveStatus();
-    await sleep(300);
-    this.onChange();
-    await sleep(300);
+    this.setRemoveStatus("removing");
+    this.update();
+
+    await sleep(1000);
+    this.setRemoveStatus("removed");
+    this.update();
+    await sleep(100);
     this.setRemovePosition();
+    this.update();
+    await sleep(100);
+    this.setRemoveStatus("ok");
+    this.update();
+    this.removeList = [];
+    await sleep(100);
+    this.getDownList();
+    this.update();
     await sleep(300);
-    this.onChange();
-    await sleep(300);
+    this.checkStatus();
   }
+
+  a2b(a, b) {
+    const ax = this.data.getIn([a, "x"]);
+    const ay = this.data.getIn([a, "y"]);
+    const bx = this.data.getIn([b, "x"]);
+    const by = this.data.getIn([b, "y"]);
+    this.data = this.data
+      .setIn([a, "x"], bx)
+      .setIn([a, "y"], by)
+      .setIn([b, "x"], ax)
+      .setIn([b, "y"], ay);
+  }
+
+  click = async (o) => {
+    const selectIdx = this.data.findIndex((i) => i.select);
+    const objIdx = this.data.findIndex((i) => i.x === o.x && i.y === o.y);
+    console.log(selectIdx, objIdx);
+    if (selectIdx != -1) {
+      if (selectIdx === objIdx) {
+        this.data = this.data.setIn([objIdx, "select"], false);
+      } else {
+        this.a2b(selectIdx, objIdx);
+        this.data = this.data.setIn([selectIdx, "select"], false);
+      }
+      // setList(a2b(this.data, selectIdx, objIdx).setIn([selectIdx, "select"], false));
+    } else {
+      console.log("66666", selectIdx);
+      this.data = this.data.setIn([objIdx, "select"], true);
+    }
+    this.update();
+    this.checkStatus();
+  };
 }
 
 const gamer = new Gamer(5, 5);
@@ -221,7 +295,7 @@ export default () => {
   const [list, setList] = useState(gamer.getData());
   useEffect(() => {
     gamer.setCallback(setList);
-    gamer.start();
+    gamer.checkStatus();
   }, []);
 
   function a2b(list, a, b) {
@@ -237,22 +311,10 @@ export default () => {
   }
 
   function test(o) {
-    const selectIdx = list.findIndex((i) => i.select);
-    const objIdx = list.findIndex((i) => i.x === o.x && i.y === o.y);
-    if (selectIdx != -1) {
-      setList(a2b(list, selectIdx, objIdx).setIn([selectIdx, "select"], false));
-      // 重选
-      //   setList(
-      //     list.setIn([selectIdx, "select"], false).setIn([objIdx, "select"], true)
-      //   );
-    } else if (selectIdx === objIdx) {
-      setList(list.setIn([objIdx, "select"], false));
-    } else {
-      setList(list.setIn([objIdx, "select"], true));
-    }
+    gamer.click(o);
   }
 
-  console.log("list: ", list, JSON.stringify(list));
+  // console.log("list: ", list);
 
   return (
     <div className="list">
@@ -264,21 +326,42 @@ export default () => {
             }}
             className={cls([
               "item",
+              // "animate__animated",
               {
                 select: i.select,
-                remove: i.remove,
+                removed: i.status === "removed",
+                // animate__tada: i.remove,
               },
             ])}
             key={i.id}
             style={{
               width: WIDTH,
               height: WIDTH,
-              left: i.x * WIDTH + "px",
-              top: i.y * WIDTH + "px",
-              backgroundImage: "url(./images/" + i.animal + ".svg)",
+              transform:
+                "translate3d(" + i.x * WIDTH + "px," + i.y * WIDTH + "px,0)",
+              // left: i.x * WIDTH + "px",
+              // top: i.y * WIDTH + "px",
+              // backgroundImage: "url(./images/" + i.animal + ".svg)",
             }}
           >
-            ({i.x},{i.y})
+            <div
+              className={cls([
+                "icon",
+                "animate__animated",
+                {
+                  animate__tada: i.status === "removing",
+                },
+              ])}
+              key={i.id}
+              style={{
+                width: WIDTH,
+                height: WIDTH,
+                backgroundImage: "url(./images/" + i.animal + ".svg)",
+              }}
+            >
+              {i.status + ":" + i.x + "," + i.y}
+            </div>
+            {/* () */}
           </div>
         );
       })}
