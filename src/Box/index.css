@@ -16,14 +16,9 @@
   left: 0;
   top: 0;
 
-  background-size: 50%;
-  background-repeat: no-repeat;
-  background-position: center;
-
-  transition: transform 0.3s;
+  transition: transform 0.5s;
 
   text-align: center;
-  /* line-height: 170px; */
   font-size: 10px;
   color: #999;
 
@@ -38,7 +33,7 @@
 .icon {
   width: 100px;
   height: 100px;
-  background-size: 50%;
+  background-size: 80%;
   background-repeat: no-repeat;
   background-position: center;
   /* border-radius: 100%; */

@@ -230,23 +230,21 @@ class Gamer {
     console.log("checkStatus");
     this.getRemoveList();
     console.log("this.removeList", this.removeList);
-
     if (this.removeList.length === 0) return; // 检查是否有需要更新的方块
-    await sleep(300);
     this.setRemoveStatus("removing");
     this.update();
 
     await sleep(1000);
     this.setRemoveStatus("removed");
     this.update();
-    await sleep(100);
+    await sleep(30);
     this.setRemovePosition();
     this.update();
-    await sleep(100);
+    await sleep(30);
     this.setRemoveStatus("ok");
     this.update();
     this.removeList = [];
-    await sleep(100);
+    await sleep(30);
     this.getDownList();
     this.update();
     await sleep(300);
@@ -359,9 +357,8 @@ export default () => {
                 backgroundImage: "url(./images/" + i.animal + ".svg)",
               }}
             >
-              {i.status + ":" + i.x + "," + i.y}
+              {/* {i.status + ":" + i.x + "," + i.y} */}
             </div>
-            {/* () */}
           </div>
         );
       })}
