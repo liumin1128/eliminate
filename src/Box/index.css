@@ -1,9 +1,16 @@
+.root {
+  width: 500px;
+  height: 500px;
+  /* border: 1px red solid; */
+  background: #ccc;
+  /* overflow: hidden; */
+}
+
 .list {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
   position: relative;
-  overflow: hidden;
   height: 0;
   padding-top: 100%;
 }

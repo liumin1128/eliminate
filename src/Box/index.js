@@ -7,16 +7,14 @@ import Gamer from "./game";
 import "animate.css";
 import "./index.css";
 
-const WIDTH = 75;
-
 const gamer = new Gamer(9, 9);
 
 export default () => {
-  const [list, setList] = useState(gamer.getData());
-  // useEffect(() => {
-  //   gamer.setCallback(setList);
-  //   gamer.checkStatus();
-  // }, []);
+  const [list, setList] = useState(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    setWidth(document.querySelector(".root").offsetWidth / 9);
+  }, []);
 
   function test(o) {
     gamer.click(o);
@@ -28,60 +26,64 @@ export default () => {
     gamer.checkStatus();
   }
 
-  // console.log("list: ", list);
-
   return (
-    <div>
-      <button onClick={start}>start</button>
-
-      <div className="list">
-        {list.map((i) => {
-          return (
-            <div
-              onClick={() => {
-                test(i);
-              }}
-              className={cls([
-                "item",
-                // "animate__animated",
-                {
-                  select: i.select,
-                  removed: i.status === "removed",
-                  // animate__tada: i.remove,
-                },
-              ])}
-              key={i.id}
-              style={{
-                width: WIDTH,
-                height: WIDTH,
-                transform:
-                  "translate3d(" + i.x * WIDTH + "px," + i.y * WIDTH + "px,0)",
-                // left: i.x * WIDTH + "px",
-                // top: i.y * WIDTH + "px",
-                // backgroundImage: "url(./images/" + i.animal + ".svg)",
-              }}
-            >
+    <div className="root">
+      {list ? (
+        <div className="list">
+          {list.map((i) => {
+            return (
               <div
+                onClick={() => {
+                  test(i);
+                }}
                 className={cls([
-                  "icon",
-                  "animate__animated",
+                  "item",
+                  // "animate__animated",
                   {
-                    animate__tada: i.status === "removing",
+                    select: i.select,
+                    removed: i.status === "removed",
+                    // animate__tada: i.remove,
                   },
                 ])}
                 key={i.id}
                 style={{
-                  width: WIDTH,
-                  height: WIDTH,
-                  backgroundImage: "url(./images/" + i.animal + ".svg)",
+                  width: width,
+                  height: width,
+                  transform:
+                    "translate3d(" +
+                    i.x * width +
+                    "px," +
+                    i.y * width +
+                    "px,0)",
+                  // left: i.x * width + "px",
+                  // top: i.y * width + "px",
+                  // backgroundImage: "url(./images/" + i.animal + ".svg)",
                 }}
               >
-                {/* {i.status + ":" + i.x + "," + i.y} */}
+                <div
+                  className={cls([
+                    "icon",
+                    "animate__animated",
+                    {
+                      animate__tada: i.status === "removing",
+                    },
+                  ])}
+                  key={i.id}
+                  style={{
+                    width: width,
+                    height: width,
+                    backgroundImage: "url(./images/" + i.animal + ".svg)",
+                  }}
+                >
+                  {/* {i.status + ":" + i.x + "," + i.y} */}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <button onClick={start}>start</button>
+      )}
     </div>
   );
 };
