@@ -318,7 +318,7 @@ class Gamer {
 
     this.score = this.score + removeList.length * this.combo * 100;
     this.onScoreChange(this.score);
-    this.time = this.time + this.combo * 1000;
+    this.time = this.time + 1000;
     if (this.time > 30000) {
       this.time = 30000;
     }
