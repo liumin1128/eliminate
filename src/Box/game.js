@@ -102,7 +102,7 @@ class Gamer {
     this.callback(this.data);
   };
 
-  getRemoveList2(data) {
+  getRemoveList(data) {
     const transXYMap = {
       x: "y",
       y: "x",
@@ -204,121 +204,18 @@ class Gamer {
     return removeList;
   }
 
-  getRemoveList() {
-    const transXYMap = {
-      x: "y",
-      y: "x",
-    };
-
-    const transMaxXYMap = {
-      x: this.maxX,
-      y: this.maxY,
-    };
-
-    function checkLine(list, row, type) {
-      let p = 0;
-      let q = 0;
-      let result = [];
-
-      function getItem(data) {
-        const item = list.find(
-          (i) => i[type] === data && i[transXYMap[type]] === row
-        );
-
-        return item;
-      }
-
-      function getValue(value) {
-        let x;
-        let y;
-        let idx;
-        if (type === "x") {
-          x = value;
-          y = row;
-        }
-        if (type === "y") {
-          x = row;
-          y = value;
-        }
-        idx = list.findIndex((i) => i.x === x && i.y === y);
-        return { x, y, idx };
-      }
-
-      let current;
-
-      function loop() {
-        let next = getItem(q);
-
-        if (!next) {
-          current = null;
-          if (q < transMaxXYMap[type] - 1) {
-            q += 1;
-            loop();
-            return;
-          }
-        }
-
-        if (!current) {
-          current = next;
-        }
-
-        if (current.animal !== next.animal) {
-          if (q - 1 - p > 1) {
-            for (let x = p; x <= q - 1; x++) {
-              result.push(getValue(x));
-            }
-          }
-          p = q;
-        }
-
-        if (q === transMaxXYMap[type] - 1) {
-          if (q - p > 1) {
-            for (let x = p; x <= q; x++) {
-              result.push(getValue(x));
-            }
-          }
-          return;
-        }
-
-        if (q < transMaxXYMap[type] - 1) {
-          q += 1;
-          current = next;
-          loop();
-          return;
-        }
-      }
-
-      loop();
-
-      return result;
-    }
-
-    let removeList = [];
-    for (let i = 0; i < this.maxY; i++) {
-      removeList.push(checkLine(this.data, i, "x"));
-    }
-    for (let i = 0; i < this.maxX; i++) {
-      removeList.push(checkLine(this.data, i, "y"));
-    }
-    const s = flatten(removeList);
-    const t = unionBy(s, (i) => i.idx);
-    removeList = t;
-    this.removeList = removeList;
-    return removeList;
-  }
-
-  setRemoveStatus(status) {
+  setRemoveStatus(removeList, status) {
     let temp = this.data;
-    this.removeList.map(({ idx }) => {
+    removeList.map(({ idx }) => {
       temp = temp.setIn([idx, "status"], status);
     });
-    this.data = temp;
+    return temp;
   }
 
-  setRemovePosition() {
+  setRemovePosition(removeList) {
     let temp = this.data;
     let sumMap = {};
-    this.removeList.map(({ idx, x, y }) => {
+    removeList.map(({ idx, x, y }) => {
       if (sumMap[x] === undefined) {
         sumMap[x] = -1;
       } else {
@@ -329,8 +226,7 @@ class Gamer {
         // .setIn([idx, "remove"], false)
         .setIn([idx, "animal"], getRandomAnmal());
     });
-
-    this.data = temp;
+    return temp;
   }
 
   getDownList() {
@@ -365,9 +261,10 @@ class Gamer {
       .setIn([b, "x"], ax)
       .setIn([b, "y"], ay);
 
-    const hasCanRemove = this.getRemoveList2(temp);
-    if (hasCanRemove.length > 0) {
+    const removeList = this.getRemoveList(temp);
+    if (removeList.length > 0) {
       this.data = temp;
+      this.remove(removeList);
     }
   }
 
@@ -386,34 +283,37 @@ class Gamer {
     } else {
       this.data = this.data.setIn([objIdx, "select"], true);
     }
-    this.update();
-    this.checkStatus();
+    // this.update();
+    // this.checkStatus();
   };
 
-  async checkStatus() {
-    this.getRemoveList();
-    if (this.removeList.length === 0) return; // 检查是否有需要更新的方块
-
+  async remove(removeList) {
     this.sound["d1"].play();
 
-    this.setRemoveStatus("removing");
+    this.data = this.setRemoveStatus(removeList, "removing");
+    this.update();
+    await sleep(1000);
+    this.data = this.setRemoveStatus(removeList, "removed");
+    this.update();
+    await sleep(30);
+    this.data = this.setRemovePosition(removeList);
+    this.update();
+    await sleep(30);
+    this.data = this.setRemoveStatus(removeList, "ok");
     this.update();
 
-    await sleep(1000);
-    this.setRemoveStatus("removed");
-    this.update();
-    await sleep(30);
-    this.setRemovePosition();
-    this.update();
-    await sleep(30);
-    this.setRemoveStatus("ok");
-    this.update();
-    this.removeList = [];
     await sleep(30);
     this.getDownList();
     this.update();
+
     await sleep(300);
     this.checkStatus();
+  }
+
+  async checkStatus() {
+    const removeList = this.getRemoveList(this.data);
+    if (removeList.length === 0) return; // 检查是否有需要更新的方块
+    await this.remove(removeList);
   }
 }
 
