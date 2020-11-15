@@ -66,13 +66,22 @@ class Gamer {
   constructor(x, y) {
     this.maxX = x;
     this.maxY = y;
-    this.score = 0;
-    this.combo = 0;
-
-    this.data = List(initData(x, y));
   }
 
-  init = ({ onDataChange, onScoreChange }) => {
+  start() {
+    this.score = 0;
+    this.combo = 0;
+    this.time = 30000;
+    this.data = List(initData(this.maxX, this.maxY));
+
+    this.onDataChange(this.data);
+    this.onScoreChange(this.score);
+    this.onTimeChange(this.time);
+    this.checkStatus();
+    this.timeLoop();
+  }
+
+  init = ({ onDataChange, onScoreChange, onTimeChange }) => {
     Howler.volume(0.5);
 
     this.sound = {};
@@ -92,8 +101,22 @@ class Gamer {
 
     this.onDataChange = onDataChange;
     this.onScoreChange = onScoreChange;
+    this.onTimeChange = onTimeChange;
 
-    this.checkStatus();
+    this.start();
+  };
+
+  timeLoop = () => {
+    if (this.time > 0) {
+      this.time = this.time - 1000;
+      this.onTimeChange(this.time);
+      setTimeout(() => {
+        this.timeLoop();
+      }, 1000);
+    } else {
+      alert("game over, socre:" + this.score);
+      this.start();
+    }
   };
 
   getData = () => {
@@ -295,6 +318,11 @@ class Gamer {
 
     this.score = this.score + removeList.length * this.combo * 100;
     this.onScoreChange(this.score);
+    this.time = this.time + this.combo * 1000;
+    if (this.time > 30000) {
+      this.time = 30000;
+    }
+    this.onTimeChange(this.time);
 
     this.data = this.setRemoveStatus(removeList, "removing");
     this.update();

@@ -15,6 +15,7 @@ const gamer = new Gamer(m, n);
 export default () => {
   const [list, setList] = useState(null);
   const [score, setScore] = useState(0);
+  const [time, setTime] = useState(0);
   const [width, setWidth] = useState(0);
   useEffect(() => {
     setWidth(document.querySelector(".root").offsetWidth / m);
@@ -25,12 +26,20 @@ export default () => {
   }
 
   function start() {
-    gamer.init({ onDataChange: setList, onScoreChange: setScore });
+    gamer.init({
+      onDataChange: setList,
+      onScoreChange: setScore,
+      onTimeChange: setTime,
+    });
   }
 
   return (
     <div className="root">
-      <h1>score: {score}</h1>
+      <div className="header">
+        <h1>Score: {score}</h1>
+        <h1>Time: {time / 1000}</h1>
+      </div>
+
       {list ? (
         <div className="list" style={{ paddingTop: (n / m) * 100 + "%" }}>
           {list.map((i) => {
@@ -86,7 +95,9 @@ export default () => {
           })}
         </div>
       ) : (
-        <button onClick={start}>start</button>
+        <div className="start" onClick={start}>
+          START
+        </div>
       )}
     </div>
   );
