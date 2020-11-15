@@ -70,6 +70,7 @@ class Gamer {
     this.removeList = [];
     this.data = List(initData(x, y));
   }
+
   init = () => {
     Howler.volume(0.5);
 
@@ -100,6 +101,108 @@ class Gamer {
   update = () => {
     this.callback(this.data);
   };
+
+  getRemoveList2(data) {
+    const transXYMap = {
+      x: "y",
+      y: "x",
+    };
+
+    const transMaxXYMap = {
+      x: this.maxX,
+      y: this.maxY,
+    };
+
+    function checkLine(list, row, type) {
+      let p = 0;
+      let q = 0;
+      let result = [];
+
+      function getItem(data) {
+        const item = list.find(
+          (i) => i[type] === data && i[transXYMap[type]] === row
+        );
+
+        return item;
+      }
+
+      function getValue(value) {
+        let x;
+        let y;
+        let idx;
+        if (type === "x") {
+          x = value;
+          y = row;
+        }
+        if (type === "y") {
+          x = row;
+          y = value;
+        }
+        idx = list.findIndex((i) => i.x === x && i.y === y);
+        return { x, y, idx };
+      }
+
+      let current;
+
+      function loop() {
+        let next = getItem(q);
+
+        if (!next) {
+          current = null;
+          if (q < transMaxXYMap[type] - 1) {
+            q += 1;
+            loop();
+            return;
+          }
+        }
+
+        if (!current) {
+          current = next;
+        }
+
+        if (current.animal !== next.animal) {
+          if (q - 1 - p > 1) {
+            for (let x = p; x <= q - 1; x++) {
+              result.push(getValue(x));
+            }
+          }
+          p = q;
+        }
+
+        if (q === transMaxXYMap[type] - 1) {
+          if (q - p > 1) {
+            for (let x = p; x <= q; x++) {
+              result.push(getValue(x));
+            }
+          }
+          return;
+        }
+
+        if (q < transMaxXYMap[type] - 1) {
+          q += 1;
+          current = next;
+          loop();
+          return;
+        }
+      }
+
+      loop();
+
+      return result;
+    }
+
+    let removeList = [];
+    for (let i = 0; i < this.maxY; i++) {
+      removeList.push(checkLine(data, i, "x"));
+    }
+    for (let i = 0; i < this.maxX; i++) {
+      removeList.push(checkLine(data, i, "y"));
+    }
+    const s = flatten(removeList);
+    const t = unionBy(s, (i) => i.idx);
+    removeList = t;
+    return removeList;
+  }
 
   getRemoveList() {
     const transXYMap = {
@@ -250,11 +353,22 @@ class Gamer {
     const ay = this.data.getIn([a, "y"]);
     const bx = this.data.getIn([b, "x"]);
     const by = this.data.getIn([b, "y"]);
-    this.data = this.data
+
+    // 如果不是水平方向平移一位
+    if (Math.abs(ax - bx) + Math.abs(ay - by) != 1) {
+      return;
+    }
+
+    const temp = this.data
       .setIn([a, "x"], bx)
       .setIn([a, "y"], by)
       .setIn([b, "x"], ax)
       .setIn([b, "y"], ay);
+
+    const hasCanRemove = this.getRemoveList2(temp);
+    if (hasCanRemove.length > 0) {
+      this.data = temp;
+    }
   }
 
   click = async (o) => {

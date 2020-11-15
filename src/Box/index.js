@@ -7,7 +7,7 @@ import Gamer from "./game";
 import "animate.css";
 import "./index.css";
 
-const gamer = new Gamer(9, 9);
+const gamer = new Gamer(5, 5);
 
 export default () => {
   const [list, setList] = useState(null);
