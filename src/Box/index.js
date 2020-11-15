@@ -14,6 +14,7 @@ const gamer = new Gamer(m, n);
 
 export default () => {
   const [list, setList] = useState(null);
+  const [score, setScore] = useState(0);
   const [width, setWidth] = useState(0);
   useEffect(() => {
     setWidth(document.querySelector(".root").offsetWidth / m);
@@ -24,13 +25,12 @@ export default () => {
   }
 
   function start() {
-    gamer.setCallback(setList);
-    gamer.init();
-    gamer.checkStatus();
+    gamer.init({ onDataChange: setList, onScoreChange: setScore });
   }
 
   return (
     <div className="root">
+      <h1>score: {score}</h1>
       {list ? (
         <div className="list" style={{ paddingTop: (n / m) * 100 + "%" }}>
           {list.map((i) => {

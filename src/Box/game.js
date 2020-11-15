@@ -66,12 +66,13 @@ class Gamer {
   constructor(x, y) {
     this.maxX = x;
     this.maxY = y;
+    this.score = 0;
+    this.combo = 0;
 
-    this.removeList = [];
     this.data = List(initData(x, y));
   }
 
-  init = () => {
+  init = ({ onDataChange, onScoreChange }) => {
     Howler.volume(0.5);
 
     this.sound = {};
@@ -88,10 +89,11 @@ class Gamer {
         onend: function () {},
       });
     });
-  };
 
-  setCallback = (callback) => {
-    this.callback = callback;
+    this.onDataChange = onDataChange;
+    this.onScoreChange = onScoreChange;
+
+    this.checkStatus();
   };
 
   getData = () => {
@@ -99,7 +101,7 @@ class Gamer {
   };
 
   update = () => {
-    this.callback(this.data);
+    this.onDataChange(this.data);
   };
 
   getRemoveList(data) {
@@ -291,6 +293,9 @@ class Gamer {
   async remove(removeList) {
     this.sound["d1"].play();
 
+    this.score = this.score + removeList.length * this.combo * 100;
+    this.onScoreChange(this.score);
+
     this.data = this.setRemoveStatus(removeList, "removing");
     this.update();
 
@@ -317,6 +322,16 @@ class Gamer {
   async checkStatus() {
     const removeList = this.getRemoveList(this.data);
     if (removeList.length === 0) return; // 检查是否有需要更新的方块
+
+    // 重新计算移除组
+    if (removeList.length === 0) {
+      // 重置连击数
+      this.combo = 0;
+      return;
+    }
+
+    // 累计连击数
+    this.combo = this.combo + 1;
     await this.remove(removeList);
   }
 }
