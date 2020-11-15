@@ -1,6 +1,7 @@
 import flatten from "lodash/flatten";
 import unionBy from "lodash/unionBy";
 import { List } from "immutable";
+import { Howl, Howler } from "howler";
 
 export const randomString = (len = 32) => {
   const $chars = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
@@ -69,7 +70,27 @@ class Gamer {
     this.removeList = [];
     this.data = List(initData(x, y));
   }
-  init = () => {};
+  init = () => {
+    Howler.volume(0.5);
+
+    this.sound = {};
+
+    ["d1", "d2", "keyboard"].map((i) => {
+      this.sound[i] = new Howl({
+        src: ["./audios/" + i + ".mp3"],
+        onplayerror: function (err) {
+          console.log("onplayerror", err);
+          this.sound.once("unlock", function () {
+            this.sound.play();
+          });
+        },
+        volume: 0.5,
+        onend: function () {
+          console.log("Finished!");
+        },
+      });
+    });
+  };
 
   setCallback = (callback) => {
     this.callback = callback;
@@ -222,11 +243,47 @@ class Gamer {
     this.data = temp;
   }
 
+  a2b(a, b) {
+    const ax = this.data.getIn([a, "x"]);
+    const ay = this.data.getIn([a, "y"]);
+    const bx = this.data.getIn([b, "x"]);
+    const by = this.data.getIn([b, "y"]);
+    this.data = this.data
+      .setIn([a, "x"], bx)
+      .setIn([a, "y"], by)
+      .setIn([b, "x"], ax)
+      .setIn([b, "y"], ay);
+  }
+
+  click = async (o) => {
+    this.sound["keyboard"].play();
+    const selectIdx = this.data.findIndex((i) => i.select);
+    const objIdx = this.data.findIndex((i) => i.x === o.x && i.y === o.y);
+    console.log(selectIdx, objIdx);
+    if (selectIdx != -1) {
+      if (selectIdx === objIdx) {
+        this.data = this.data.setIn([objIdx, "select"], false);
+      } else {
+        this.a2b(selectIdx, objIdx);
+        this.data = this.data.setIn([selectIdx, "select"], false);
+      }
+      // setList(a2b(this.data, selectIdx, objIdx).setIn([selectIdx, "select"], false));
+    } else {
+      console.log("66666", selectIdx);
+      this.data = this.data.setIn([objIdx, "select"], true);
+    }
+    this.update();
+    this.checkStatus();
+  };
+
   async checkStatus() {
     console.log("checkStatus");
     this.getRemoveList();
     console.log("this.removeList", this.removeList);
     if (this.removeList.length === 0) return; // 检查是否有需要更新的方块
+
+    this.sound["d1"].play();
+
     this.setRemoveStatus("removing");
     this.update();
 
@@ -246,38 +303,6 @@ class Gamer {
     await sleep(300);
     this.checkStatus();
   }
-
-  a2b(a, b) {
-    const ax = this.data.getIn([a, "x"]);
-    const ay = this.data.getIn([a, "y"]);
-    const bx = this.data.getIn([b, "x"]);
-    const by = this.data.getIn([b, "y"]);
-    this.data = this.data
-      .setIn([a, "x"], bx)
-      .setIn([a, "y"], by)
-      .setIn([b, "x"], ax)
-      .setIn([b, "y"], ay);
-  }
-
-  click = async (o) => {
-    const selectIdx = this.data.findIndex((i) => i.select);
-    const objIdx = this.data.findIndex((i) => i.x === o.x && i.y === o.y);
-    console.log(selectIdx, objIdx);
-    if (selectIdx != -1) {
-      if (selectIdx === objIdx) {
-        this.data = this.data.setIn([objIdx, "select"], false);
-      } else {
-        this.a2b(selectIdx, objIdx);
-        this.data = this.data.setIn([selectIdx, "select"], false);
-      }
-      // setList(a2b(this.data, selectIdx, objIdx).setIn([selectIdx, "select"], false));
-    } else {
-      console.log("66666", selectIdx);
-      this.data = this.data.setIn([objIdx, "select"], true);
-    }
-    this.update();
-    this.checkStatus();
-  };
 }
 
 export default Gamer;
