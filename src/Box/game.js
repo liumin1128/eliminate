@@ -283,7 +283,7 @@ class Gamer {
     } else {
       this.data = this.data.setIn([objIdx, "select"], true);
     }
-    // this.update();
+    this.update();
     // this.checkStatus();
   };
 
@@ -292,12 +292,15 @@ class Gamer {
 
     this.data = this.setRemoveStatus(removeList, "removing");
     this.update();
+
     await sleep(1000);
     this.data = this.setRemoveStatus(removeList, "removed");
     this.update();
+
     await sleep(30);
     this.data = this.setRemovePosition(removeList);
     this.update();
+
     await sleep(30);
     this.data = this.setRemoveStatus(removeList, "ok");
     this.update();
