@@ -141,10 +141,23 @@ class Gamer {
         return { x, y, idx };
       }
 
-      let current = getItem(q);
+      let current;
 
       function loop() {
         let next = getItem(q);
+
+        if (!next) {
+          current = null;
+          if (q < transMaxXYMap[type] - 1) {
+            q += 1;
+            loop();
+            return;
+          }
+        }
+
+        if (!current) {
+          current = next;
+        }
 
         if (current.animal !== next.animal) {
           if (q - 1 - p > 1) {

@@ -33,7 +33,7 @@
 }
 
 .item:hover {
-  border: 1px aquamarine dashed;
+  border: 3px aquamarine dashed;
 }
 
 .icon {
@@ -51,6 +51,10 @@
 
 .remove {
   opacity: 0;
+}
+
+.removing {
+  background-color: rgba(255, 0, 0, 0.5);
 }
 
 .removed {

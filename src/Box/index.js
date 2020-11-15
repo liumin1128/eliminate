@@ -42,6 +42,7 @@ export default () => {
                   {
                     select: i.select,
                     removed: i.status === "removed",
+                    removing: i.status === "removing",
                     // animate__tada: i.remove,
                   },
                 ])}
