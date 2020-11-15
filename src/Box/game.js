@@ -79,15 +79,12 @@ class Gamer {
       this.sound[i] = new Howl({
         src: ["./audios/" + i + ".mp3"],
         onplayerror: function (err) {
-          console.log("onplayerror", err);
           this.sound.once("unlock", function () {
             this.sound.play();
           });
         },
         volume: 0.5,
-        onend: function () {
-          console.log("Finished!");
-        },
+        onend: function () {},
       });
     });
   };
@@ -141,7 +138,6 @@ class Gamer {
           y = value;
         }
         idx = list.findIndex((i) => i.x === x && i.y === y);
-        console.log({ x, y, idx });
         return { x, y, idx };
       }
 
@@ -181,10 +177,7 @@ class Gamer {
       return result;
     }
 
-    // console.log("00000");
-
     let removeList = [];
-    // console.log(this);
     for (let i = 0; i < this.maxY; i++) {
       removeList.push(checkLine(this.data, i, "x"));
     }
@@ -200,7 +193,6 @@ class Gamer {
 
   setRemoveStatus(status) {
     let temp = this.data;
-    // console.log(this.removeList)
     this.removeList.map(({ idx }) => {
       temp = temp.setIn([idx, "status"], status);
     });
@@ -223,8 +215,6 @@ class Gamer {
     });
 
     this.data = temp;
-
-    console.log("this.data:", this.data);
   }
 
   getDownList() {
@@ -234,7 +224,6 @@ class Gamer {
       for (let y = -this.maxY; y < this.maxY; y++) {
         const idx = this.data.findIndex((i) => i.x === x && i.y === y);
         if (idx !== -1) {
-          // console.log("getDownList: ", item.x, item.y);
           temp = temp.setIn([idx, "y"], sum);
           sum++;
         }
@@ -259,7 +248,6 @@ class Gamer {
     this.sound["keyboard"].play();
     const selectIdx = this.data.findIndex((i) => i.select);
     const objIdx = this.data.findIndex((i) => i.x === o.x && i.y === o.y);
-    console.log(selectIdx, objIdx);
     if (selectIdx != -1) {
       if (selectIdx === objIdx) {
         this.data = this.data.setIn([objIdx, "select"], false);
@@ -269,7 +257,6 @@ class Gamer {
       }
       // setList(a2b(this.data, selectIdx, objIdx).setIn([selectIdx, "select"], false));
     } else {
-      console.log("66666", selectIdx);
       this.data = this.data.setIn([objIdx, "select"], true);
     }
     this.update();
@@ -277,9 +264,7 @@ class Gamer {
   };
 
   async checkStatus() {
-    console.log("checkStatus");
     this.getRemoveList();
-    console.log("this.removeList", this.removeList);
     if (this.removeList.length === 0) return; // 检查是否有需要更新的方块
 
     this.sound["d1"].play();
