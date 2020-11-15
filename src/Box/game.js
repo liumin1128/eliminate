@@ -24,7 +24,7 @@ function getRandomAnmal() {
     // "mouse",
     "sea-lion",
     "bear",
-    // "dog",
+    "dog",
     // "hippo",
     // "owl",
     // "sheep",
@@ -270,6 +270,7 @@ class Gamer {
 
   click = async (o) => {
     this.sound["keyboard"].play();
+
     const selectIdx = this.data.findIndex((i) => i.select);
     const objIdx = this.data.findIndex((i) => i.x === o.x && i.y === o.y);
     if (selectIdx != -1) {

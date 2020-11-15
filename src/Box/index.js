@@ -7,13 +7,16 @@ import Gamer from "./game";
 import "animate.css";
 import "./index.css";
 
-const gamer = new Gamer(9, 9);
+const m = 5;
+const n = 7;
+
+const gamer = new Gamer(m, n);
 
 export default () => {
   const [list, setList] = useState(null);
   const [width, setWidth] = useState(0);
   useEffect(() => {
-    setWidth(document.querySelector(".root").offsetWidth / 9);
+    setWidth(document.querySelector(".root").offsetWidth / m);
   }, []);
 
   function test(o) {
@@ -29,7 +32,7 @@ export default () => {
   return (
     <div className="root">
       {list ? (
-        <div className="list">
+        <div className="list" style={{ paddingTop: (n / m) * 100 + "%" }}>
           {list.map((i) => {
             return (
               <div
