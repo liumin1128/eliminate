@@ -313,6 +313,14 @@ class Gamer {
     // this.checkStatus();
   };
 
+  touchMove = async (sx,sy,ex,ey) => {
+    const sId = this.data.findIndex((i) => i.x === sx && i.y === sy);
+    const eId = this.data.findIndex((i) => i.x === ex && i.y === ey);
+
+    this.a2b(sId, eId);
+    this.update();
+  }
+
   async remove(removeList) {
     this.sound["d1"].play();
 

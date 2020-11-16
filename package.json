@@ -1,7 +1,6 @@
 {
   "name": "animal",
   "version": "0.1.0",
-  "homepage": "https://liumin1128.github.io/eliminate",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
