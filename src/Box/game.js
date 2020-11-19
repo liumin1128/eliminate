@@ -2,17 +2,8 @@ import flatten from "lodash/flatten";
 import unionBy from "lodash/unionBy";
 import { List } from "immutable";
 import { Howl, Howler } from "howler";
-
-export const randomString = (len = 32) => {
-  const $chars = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
-  /** **默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1*** */
-  const maxPos = $chars.length;
-  let pwd = "";
-  for (let i = 0; i < len; i += 1) {
-    pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-  }
-  return pwd;
-};
+import { updateScore } from "../utils/av"
+import { randomString } from "../utils/common"
 
 const sleep = (t) => new Promise((resolve, reject) => setTimeout(resolve, t));
 
@@ -71,7 +62,7 @@ class Gamer {
   start() {
     this.score = 0;
     this.combo = 0;
-    this.time = 30000;
+    this.time = 5;
     this.data = List(initData(this.maxX, this.maxY));
 
     this.onDataChange(this.data);
@@ -114,8 +105,12 @@ class Gamer {
         this.timeLoop();
       }, 1000);
     } else {
+      updateScore().then(data => {
+        console.log("data", data)
+      })
       alert("game over, socre:" + this.score);
-      this.start();
+      // this.start();
+
     }
   };
 
