@@ -2,8 +2,8 @@ import flatten from "lodash/flatten";
 import unionBy from "lodash/unionBy";
 import { List } from "immutable";
 import { Howl, Howler } from "howler";
-import { updateScore } from "../utils/av"
-import { randomString } from "../utils/common"
+// import { updateScore } from "../utils/av";
+import { randomString } from "../utils/common";
 
 const sleep = (t) => new Promise((resolve, reject) => setTimeout(resolve, t));
 
@@ -72,7 +72,7 @@ class Gamer {
     this.timeLoop();
   }
 
-  init = ({ onDataChange, onScoreChange, onTimeChange }) => {
+  init = ({ onDataChange, onScoreChange, onTimeChange, onGameOver }) => {
     Howler.volume(0.5);
 
     this.sound = {};
@@ -93,6 +93,7 @@ class Gamer {
     this.onDataChange = onDataChange;
     this.onScoreChange = onScoreChange;
     this.onTimeChange = onTimeChange;
+    this.onGameOver = onGameOver;
 
     this.start();
   };
@@ -105,12 +106,9 @@ class Gamer {
         this.timeLoop();
       }, 1000);
     } else {
-      updateScore().then(data => {
-        console.log("data", data)
-      })
-      alert("game over, socre:" + this.score);
+      this.onGameOver(this.score);
+      // alert("game over, socre:" + this.score);
       // this.start();
-
     }
   };
 
@@ -308,13 +306,13 @@ class Gamer {
     // this.checkStatus();
   };
 
-  touchMove = async (sx,sy,ex,ey) => {
+  touchMove = async (sx, sy, ex, ey) => {
     const sId = this.data.findIndex((i) => i.x === sx && i.y === sy);
     const eId = this.data.findIndex((i) => i.x === ex && i.y === ey);
 
     this.a2b(sId, eId);
     this.update();
-  }
+  };
 
   async remove(removeList) {
     this.sound["d1"].play();

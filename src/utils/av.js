@@ -17,14 +17,9 @@ export async function loginAnonymously() {
   return AV.User.loginAnonymously();
 }
 
-export async function updateScore() {
-  console.log(AV.User.current());
-  if (!AV.User.current()) {
-    await loginAnonymously();
-  }
-  console.log(AV.User.current());
+export async function updateScore(score) {
   return AV.Leaderboard.updateStatistics(AV.User.current(), {
-    Eliminate: 3458,
+    Eliminate: score,
   }).catch(console.error);
 }
 
@@ -32,8 +27,19 @@ export async function getScoreList() {
   var leaderboard = AV.Leaderboard.createWithoutData("Eliminate");
   return leaderboard
     .getResults({
-      limit: 10,
+      limit: AV.User.current() ? 3 : 999,
       skip: 0,
+      selectUserKeys: ["nickname", "username"],
+    })
+    .catch(console.error);
+}
+
+export async function getAroundScoreList() {
+  var leaderboard = AV.Leaderboard.createWithoutData("Eliminate");
+  return leaderboard
+    .getResultsAroundUser({
+      limit: 10,
+      selectUserKeys: ["nickname", "username"],
     })
     .catch(console.error);
 }

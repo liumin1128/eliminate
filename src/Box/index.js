@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
+import get from "lodash/get";
+import AV from "leancloud-storage";
 import cls from "classnames";
+import Swal from "sweetalert2";
+import Rankings from "../Rankings";
+import { updateScore, loginAnonymously } from "../utils/av";
 import Gamer from "./game";
 import "animate.css";
 import "./index.css";
@@ -16,9 +21,6 @@ export default () => {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-
-
-
     setWidth(document.querySelector(".root").offsetWidth / m);
   }, []);
 
@@ -32,24 +34,93 @@ export default () => {
 
   function handleTouchEnd(e) {
     e.preventDefault();
-    const element = e.changedTouches[0].target
-    const sx = parseInt(element.getAttribute("data-x"),0)
-    const sy = parseInt(element.getAttribute("data-y"),0)
+    const element = e.changedTouches[0].target;
+    const sx = parseInt(element.getAttribute("data-x"), 0);
+    const sy = parseInt(element.getAttribute("data-y"), 0);
     // 获取触摸结束点相对于屏幕位置
-    const px= e.changedTouches[0].pageX
-    const py= e.changedTouches[0].pageY
+    const px = e.changedTouches[0].pageX;
+    const py = e.changedTouches[0].pageY;
 
     // 获取画布位置
-    const rect = document.querySelector(".list").getBoundingClientRect()
-    const rx = rect.x 
-    const ry = rect.y
+    const rect = document.querySelector(".list").getBoundingClientRect();
+    const rx = rect.x;
+    const ry = rect.y;
 
     // 对比触摸点与画布位置获取坐标
-    const ex = Math.floor((px - rx) / width)
-    const ey = Math.floor((py - ry) / width)
+    const ex = Math.floor((px - rx) / width);
+    const ey = Math.floor((py - ry) / width);
 
-    gamer.touchMove(sx,sy,ex,ey)
+    gamer.touchMove(sx, sy, ex, ey);
+  }
 
+  function submitScoreWithSetNickname(score) {
+    // return new Promise((resolve, reject) => {
+    return Swal.fire({
+      title: "Submit Your \nScore:  " + score,
+      input: "text",
+      imageUrl: "./images/cat.svg",
+      imageWidth: 120,
+      imageHeight: 120,
+      inputAttributes: {
+        autocapitalize: "off",
+        placeholder: "nickname",
+        required: true,
+      },
+      showCancelButton: true,
+      confirmButtonText: "提交",
+      cancelButtonText: "就不",
+      showLoaderOnConfirm: true,
+      // preConfirm: (value) => {
+      //   if (!value) {
+      //     alert("取个名字这么难吗！");
+      //     return;
+      //   }
+      //   user.setUsername(value);
+      //   user.setPassword("guest");
+      //   user.set("nickname", value);
+
+      //   user.signUp();
+
+      //   console.log(value);
+      //   resolve()
+      // },
+      // allowOutsideClick: () => !Swal.isLoading(),
+    });
+    // });
+  }
+
+  async function submitScore(score) {
+    await updateScore(score);
+    Swal.fire({
+      title: "Game Over！\nScore: " + score,
+      imageUrl: "./images/cat.svg",
+      imageWidth: 120,
+      imageHeight: 120,
+      confirmButtonText: "好的!",
+    });
+  }
+
+  async function handleGameOver(score = 0) {
+    try {
+      let user = AV.User.current();
+      if (!user) {
+        // await loginAnonymously();
+        const { value, isConfirmed } = await submitScoreWithSetNickname(score);
+        if (isConfirmed) {
+          user = new AV.User();
+          await user.setUsername(value);
+          await user.setPassword("test123");
+          await user.set("nickname", value);
+          await user.signUp();
+        }
+      }
+      await submitScore(score);
+      setList(null);
+    } catch (error) {
+      console.log("err:", error);
+    }
+
+    return;
   }
 
   function start() {
@@ -57,6 +128,7 @@ export default () => {
       onDataChange: setList,
       onScoreChange: setScore,
       onTimeChange: setTime,
+      onGameOver: handleGameOver,
     });
   }
 
@@ -116,8 +188,7 @@ export default () => {
                       height: width,
                       backgroundImage: "url(./images/" + i.animal + ".svg)",
                     }}
-                  >
-                  </div>
+                  ></div>
                 </div>
               );
             })}
@@ -125,7 +196,9 @@ export default () => {
         </>
       ) : (
         <div>
-          <div></div>
+          <div>
+            <Rankings />
+          </div>
           <div className="start" onClick={start}>
             START
           </div>
