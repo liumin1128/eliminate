@@ -8,3 +8,52 @@ export const randomString = (len = 32) => {
   }
   return pwd;
 };
+
+export const sleep = (t) =>
+  new Promise((resolve, reject) => setTimeout(resolve, t));
+
+export function getRandomAnmal() {
+  const list = [
+    // "alligator",
+    "chicken",
+    "frog",
+    // "mouse",
+    "sea-lion",
+    "bear",
+    "dog",
+    // "hippo",
+    // "owl",
+    // "sheep",
+    // "bull",
+    // "duck",
+    // "lion",
+    // "panda",
+    // "snake",
+    // "cat",
+    // "elephant",
+    // "monkey",
+    // "pig",
+    // "tiger",
+  ];
+
+  const i = Math.floor(Math.random() * list.length);
+  return list[i];
+}
+
+export function initData(m, n) {
+  const list = [];
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      const animal = getRandomAnmal();
+      list.push({
+        id: randomString(),
+        x: i,
+        y: j,
+        animal,
+        select: false,
+      });
+    }
+  }
+
+  return list;
+}

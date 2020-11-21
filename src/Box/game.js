@@ -3,55 +3,7 @@ import unionBy from "lodash/unionBy";
 import { List } from "immutable";
 import { Howl, Howler } from "howler";
 // import { updateScore } from "../utils/av";
-import { randomString } from "../utils/common";
-
-const sleep = (t) => new Promise((resolve, reject) => setTimeout(resolve, t));
-
-function getRandomAnmal() {
-  const list = [
-    // "alligator",
-    "chicken",
-    "frog",
-    // "mouse",
-    "sea-lion",
-    "bear",
-    "dog",
-    // "hippo",
-    // "owl",
-    // "sheep",
-    // "bull",
-    // "duck",
-    // "lion",
-    // "panda",
-    // "snake",
-    // "cat",
-    // "elephant",
-    // "monkey",
-    // "pig",
-    // "tiger",
-  ];
-
-  const i = Math.floor(Math.random() * list.length);
-  return list[i];
-}
-
-function initData(m, n) {
-  const list = [];
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      const animal = getRandomAnmal();
-      list.push({
-        id: randomString(),
-        x: i,
-        y: j,
-        animal,
-        select: false,
-      });
-    }
-  }
-
-  return list;
-}
+import { randomString, sleep, getRandomAnmal, initData } from "../utils/common";
 
 class Gamer {
   constructor(x, y) {
@@ -60,9 +12,10 @@ class Gamer {
   }
 
   start() {
+    this.status = "playing";
     this.score = 0;
     this.combo = 0;
-    this.time = 5;
+    this.time = 30000;
     this.data = List(initData(this.maxX, this.maxY));
 
     this.onDataChange(this.data);
@@ -106,6 +59,7 @@ class Gamer {
         this.timeLoop();
       }, 1000);
     } else {
+      this.status = "end";
       this.onGameOver(this.score);
       // alert("game over, socre:" + this.score);
       // this.start();
@@ -287,6 +241,11 @@ class Gamer {
   }
 
   click = async (o) => {
+    console.log("this.status: ", this.status);
+    if (this.status !== "playing") {
+      return;
+    }
+
     this.sound["keyboard"].play();
 
     const selectIdx = this.data.findIndex((i) => i.select);
@@ -307,6 +266,11 @@ class Gamer {
   };
 
   touchMove = async (sx, sy, ex, ey) => {
+    console.log("this.status: ", this.status);
+
+    if (this.status !== "playing") {
+      return;
+    }
     const sId = this.data.findIndex((i) => i.x === sx && i.y === sy);
     const eId = this.data.findIndex((i) => i.x === ex && i.y === ey);
 
@@ -349,15 +313,21 @@ class Gamer {
   }
 
   async checkStatus() {
+    if (this.status === "end") {
+      return;
+    }
+
     const removeList = this.getRemoveList(this.data);
-    if (removeList.length === 0) return; // 检查是否有需要更新的方块
 
     // 重新计算移除组
     if (removeList.length === 0) {
       // 重置连击数
       this.combo = 0;
+      this.status = "playing";
       return;
     }
+
+    this.status = "moving";
 
     // 累计连击数
     this.combo = this.combo + 1;
