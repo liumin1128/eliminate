@@ -38,7 +38,7 @@ export async function getAroundScoreList() {
   var leaderboard = AV.Leaderboard.createWithoutData("Eliminate");
   return leaderboard
     .getResultsAroundUser({
-      limit: 10,
+      limit: 13,
       selectUserKeys: ["nickname", "username"],
     })
     .catch(console.error);

@@ -1,5 +1,6 @@
 import flatten from "lodash/flatten";
 import unionBy from "lodash/unionBy";
+import get from "lodash/get";
 import { List } from "immutable";
 import { Howl, Howler } from "howler";
 // import { updateScore } from "../utils/av";
@@ -132,7 +133,7 @@ class Gamer {
           current = next;
         }
 
-        if (current.animal !== next.animal) {
+        if (get(current, "animal") !== get(next, "animal")) {
           if (q - 1 - p > 1) {
             for (let x = p; x <= q - 1; x++) {
               result.push(getValue(x));
