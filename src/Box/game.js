@@ -15,8 +15,8 @@ class Gamer {
   start() {
     this.status = "playing";
     this.score = 0;
-    this.combo = 0;
-    this.time = 30000;
+    this.combo = 1;
+    this.time = 3000000;
     this.data = List(initData(this.maxX, this.maxY));
 
     this.onDataChange(this.data);
@@ -323,7 +323,7 @@ class Gamer {
     // 重新计算移除组
     if (removeList.length === 0) {
       // 重置连击数
-      this.combo = 0;
+      this.combo = 1;
       this.status = "playing";
       return;
     }
