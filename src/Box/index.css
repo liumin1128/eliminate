@@ -10,7 +10,7 @@
   flex-wrap: wrap;
   position: relative;
   height: 0;
-  background: rgba(255, 255, 255, 0.5);
+  /* background: rgba(255, 255, 255, 0.5); */
   overflow: hidden;
 
   /* padding-top: 100%; */
