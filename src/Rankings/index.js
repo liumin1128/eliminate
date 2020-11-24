@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import get from "lodash/get";
 import AV from "leancloud-storage";
 import { getScoreList, getAroundScoreList } from "../utils/av";
+import "./index.css";
 
 function renderUser(user) {
   if (user.name) return user.name;
@@ -16,44 +17,53 @@ export default () => {
   const user = AV.User.current();
 
   useEffect(async () => {
-    const res = await getScoreList();
-    const res2 = await getAroundScoreList();
+    const [res, res2] = await Promise.all([
+      getScoreList(),
+      getAroundScoreList(),
+    ]);
     setData(res);
     setData2(res2 || []);
   }, []);
 
-  console.log(data);
-  console.log("data2: ", data2);
-
   return (
-    <div>
-      排行榜：
-      <ul>
+    <div className="container">
+      <h3 className="title">排行榜：</h3>
+      <ul className="ul">
         {data.map((i) => {
           return (
-            <li>
-              第{i.rank + 1}名
-              {get(user, "id") === get(i, "user.id") ? "(你)" : ""}{" "}
-              {get(i, "user.attributes.nickname")} {i.value}
+            <li key={get(i, "user.id")} className="li">
+              <span className="rank">
+                第{i.rank + 1}名
+                {get(user, "id") === get(i, "user.id") ? "(你)" : ""}
+              </span>
+              <span className="name">{get(i, "user.attributes.nickname")}</span>
+              <span className="value">{i.value}</span>
             </li>
           );
         })}
-      </ul>
-      <ul>
+
+        <li className="li">
+          <span className="rank">...</span>
+          <span className="name"></span>
+          <span className="value"></span>
+        </li>
         {data2
           .filter((i) => {
             const uid = get(i, "user.id");
             const idx = data.findIndex((j) => get(j, "user.id") === uid);
-            console.log(uid, idx);
             return idx === -1;
           })
           .map((i) => {
-            // if(data.find(j => get(, "user.id")))
             return (
-              <li>
-                第{i.rank + 1}名
-                {get(user, "id") === get(i, "user.id") ? "(你)" : ""}{" "}
-                {get(i, "user.attributes.nickname")} {i.value}
+              <li key={get(i, "user.id")} className="li">
+                <span className="rank">
+                  第{i.rank + 1}名
+                  {get(user, "id") === get(i, "user.id") ? "(你)" : ""}
+                </span>
+                <span className="name">
+                  {get(i, "user.attributes.nickname")}
+                </span>
+                <span className="value">{i.value}</span>
               </li>
             );
           })}

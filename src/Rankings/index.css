@@ -1,0 +1,36 @@
+.ul {
+  /* border: 1px red solid; */
+  max-height: 300px;
+  overflow-y: scroll;
+  padding: 0;
+  margin: 0;
+}
+
+.ul .li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    margin: 8px 0;
+    color: #666;
+} 
+
+.title {
+}
+
+.ul .li .rank {
+  width: 100px;
+  text-align: center;
+}
+
+.ul .li .name {
+  flex: 1;
+  text-align: left;
+}
+.ul .li .value {
+  font-weight: bold;
+}
+
+.list {
+  border: 1px red solid;
+}

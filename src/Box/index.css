@@ -77,9 +77,9 @@
 
 .start {
   cursor: pointer;
-  margin: 100px auto;
+  /* margin: 100px auto; */
+  margin-top: 16px;
   display: block;
-  width: 100%;
   text-align: center;
   padding: 16px;
   background-color: aquamarine;

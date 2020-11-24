@@ -184,8 +184,8 @@ export default () => {
                     ])}
                     key={i.id}
                     style={{
-                      width: width,
-                      height: width,
+                      width: width - 6,
+                      height: width - 6,
                       backgroundImage: "url(./images/" + i.animal + ".svg)",
                     }}
                   ></div>
