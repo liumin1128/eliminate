@@ -34,6 +34,7 @@ export default () => {
 
   function handleTouchEnd(e) {
     e.preventDefault();
+    console.log(e)
     const element = e.changedTouches[0].target;
     const sx = parseInt(element.getAttribute("data-x"), 0);
     const sy = parseInt(element.getAttribute("data-y"), 0);
@@ -50,7 +51,19 @@ export default () => {
     const ex = Math.floor((px - rx) / width);
     const ey = Math.floor((py - ry) / width);
 
-    gamer.touchMove(sx, sy, ex, ey);
+    function e2f(n, m) {
+      if(n > m) {
+        return m + 1
+      } else if(n < m) {
+        return m - 1
+      } else {
+        return m
+      }
+    }
+
+    console.log(sx, sy, e2f(ex, sx), e2f(ey, sy))
+
+    gamer.touchMove(sx, sy, e2f(ex, sx), e2f(ey, sy));
   }
 
   function submitScoreWithSetNickname(score) {
