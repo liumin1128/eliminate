@@ -22,6 +22,24 @@ export default () => {
 
   useEffect(() => {
     setWidth(document.querySelector(".root").offsetWidth / m);
+
+    // document.body.addEventListener("touchmove", bodyScroll, { passive: false });
+    function bodyScroll(e) {
+      e.preventDefault();
+    }
+
+    document.body.addEventListener("touchmove", bodyScroll, false);
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+
+    return () => {
+
+      document.body.removeEventListener("touchmove", bodyScroll, {
+        passive: false,
+      });
+      document.body.style.position = "initial";
+      document.body.style.width = "auto";
+    };
   }, []);
 
   function handleClick(o) {
@@ -34,7 +52,7 @@ export default () => {
 
   function handleTouchEnd(e) {
     e.preventDefault();
-    console.log(e)
+    console.log(e);
     const element = e.changedTouches[0].target;
     const sx = parseInt(element.getAttribute("data-x"), 0);
     const sy = parseInt(element.getAttribute("data-y"), 0);
@@ -52,16 +70,14 @@ export default () => {
     const ey = Math.floor((py - ry) / width);
 
     function e2f(n, m) {
-      if(n > m) {
-        return m + 1
-      } else if(n < m) {
-        return m - 1
+      if (n > m) {
+        return m + 1;
+      } else if (n < m) {
+        return m - 1;
       } else {
-        return m
+        return m;
       }
     }
-
-    console.log(sx, sy, e2f(ex, sx), e2f(ey, sy))
 
     gamer.touchMove(sx, sy, e2f(ex, sx), e2f(ey, sy));
   }
