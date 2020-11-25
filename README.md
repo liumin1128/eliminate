@@ -14,3 +14,6 @@ yarn
 
 yarn start
 
+注：如果本地调试图片不显示，需要去掉package.json中的homepage字段
+
+
